@@ -1,0 +1,151 @@
+C51 COMPILER V9.01   MAIN                                                                  06/30/2022 14:42:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Obj\main.obj
+COMPILER INVOKED BY: E:\KEIL_C51\C51\BIN\C51.EXE User\main.c BROWSE INCDIR(.\App\catch;.\App;.\Public;.\User;.\App\show;
+                    -.\App\change;.\App\sound;.\App\wifi) DEBUG OBJECTEXTEND PRINT(.\Obj\main.lst) OBJECT(.\Obj\main.obj)
+
+line level    source
+
+   1          #include "public.h"
+   2          #include "ds18b20.h"
+   3          #include "reg52.h"
+   4          #include "intrins.h"
+   5          #include "lcd1602.h"
+   6          #include "catch.h"
+   7          #include "sound.h"
+   8          #include "wifi.h"
+   9          #include "uart.h"
+  10          #include "change.h"
+  11          #include "catch.h"
+  12          #include "stdio.h"
+  13          
+  14          #if 1
+  15          u8 i_t = 0, j, k;
+  16          int main_idx = 0, flag = 0, main_max, idx = 0;
+  17          int temp_value;
+  18          float mymaxn = 29.7;
+  19          u8 main_temp_buf[7], show_max[8];
+  20          sbit LED1=P2^0; //将P2.0管脚定义为LED1
+  21          //u8 new_val[16];
+  22          #endif
+  23          
+  24          void main()
+  25          {
+  26   1              //初始化
+  27   1              ds18b20_init();//初始化DS18B20
+  28   1              lcd1602_init();
+  29   1              wifi_control_init();
+  30   1              
+  31   1      #if 1
+  32   1              while(1)
+  33   1              {
+  34   2                      if (flag) //编辑温度模式
+  35   2                      {
+  36   3                              delay_ms(10);
+  37   3                              continue;                
+  38   3                      }
+  39   2                                                      
+  40   2                      i_t++;
+  41   2                      if(i_t % 50 == 0)//间隔一段时间读取温度值，间隔时间要大于温度传感器转换温度时间
+  42   2                      {
+  43   3                              i_t = 0;
+  44   3                              lcd1602_clear();
+  45   3                              for (j =0 ; j < 5; j ++)
+  46   3                              {
+  47   4                                      lcd1602_show_string(0, 0, "now:");
+  48   4                                      lcd1602_show_string(0, 1, "max:");
+  49   4                              }
+  50   3                              delay_ms(10);
+  51   3                              mycatch(main_temp_buf, &temp_value);      //返回当前温度 分别是数组 数字
+  52   3                              for (j = 0; j < 5; j ++)
+  53   3                              {
+  54   4                                      lcd1602_show_string(4, 0, main_temp_buf);
+C51 COMPILER V9.01   MAIN                                                                  06/30/2022 14:42:52 PAGE 2   
+
+  55   4                                      main_max = mymaxn * 10;
+  56   4                                      show_max[0] = main_max / 100;
+  57   4                                      show_max[1] = main_max / 10 % 10;
+  58   4                                      show_max[2] = '.';
+  59   4                                      show_max[3] = main_max % 10;
+  60   4                                      show_max[4] = '\0';
+  61   4                                      for (k = 0; k < 4; k ++)
+  62   4                                      {
+  63   5                                              if (show_max[k] == '.') continue;
+  64   5                                              show_max[k] += '0';
+  65   5                                      }
+  66   4                                      lcd1602_show_string(4, 1, show_max);
+  67   4                                      delay_ms(10);
+  68   4                              }                                                                
+  69   3                              check(temp_value, mymaxn);
+  70   3                      }
+  71   2                      wifi_control();
+  72   2              }
+  73   1      #endif
+  74   1      }
+  75          
+  76          //串口中断服务函数
+  77          //接收手机APP发送的信号后控制板载资源
+  78          #if 1
+  79          void UART_IRQn() interrupt 4
+  80          {
+  81   1              static u8 i=0;
+  82   1              static u8 mypath[5];
+  83   1              u8 j = 0;
+  84   1              u8 p[2];
+  85   1      
+  86   1              if(RI)
+  87   1              {
+  88   2                      RI=0;
+  89   2                      UART_RX_BUF[i]=SBUF;//读取接收到的数据
+  90   2                      if(UART_RX_BUF[0]=='+')i++;
+  91   2                      else i=0;
+  92   2                      if(i==10)
+  93   2                      {
+  94   3                              i=0;
+  95   3                              //WIFI控制
+  96   3                              //UART_RX_BUF[9]
+  97   3                              LED1 = 0;
+  98   3                              if ( UART_RX_BUF[9] == 'A') //陷入编辑模式
+  99   3                              {
+ 100   4                                      lcd1602_clear();
+ 101   4                                      delay_ms(10);
+ 102   4                                      idx = 0;
+ 103   4                                      for (k = 0; k < 5; k++) mypath[k] = '\0';
+ 104   4                                      flag = 1;
+ 105   4                                      change('A', &mymaxn, mypath, &idx);
+*** WARNING C182 IN LINE 105 OF USER\MAIN.C: pointer to different objects
+ 106   4                              }                       
+ 107   3                              else if (UART_RX_BUF[9] == 'B') //退出编辑模式
+ 108   3                              {
+ 109   4                                      flag = 0;
+ 110   4                                      change('B', &mymaxn, mypath, &idx);
+*** WARNING C182 IN LINE 110 OF USER\MAIN.C: pointer to different objects
+ 111   4                              }
+ 112   3                              else if ((UART_RX_BUF[9] >= '2' && UART_RX_BUF[9] <= '9') || (UART_RX_BUF[9] >= 'C' && UART_RX_BUF[9] <
+             -= 'D') || UART_RX_BUF[9] == '.' )
+ 113   3                                      change(UART_RX_BUF[9], &mymaxn, mypath, &idx);
+C51 COMPILER V9.01   MAIN                                                                  06/30/2022 14:42:52 PAGE 3   
+
+*** WARNING C182 IN LINE 113 OF USER\MAIN.C: pointer to different objects
+ 114   3                              LED1 = 1;
+ 115   3                      }                       
+ 116   2              }       
+ 117   1      }
+*** WARNING C280 IN LINE 84 OF USER\MAIN.C: 'p': unreferenced local variable
+ 118          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    550    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     38       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  4 WARNING(S),  0 ERROR(S)

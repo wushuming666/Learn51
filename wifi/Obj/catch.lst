@@ -1,0 +1,49 @@
+C51 COMPILER V9.01   CATCH                                                                 06/30/2022 14:42:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CATCH
+OBJECT MODULE PLACED IN .\Obj\catch.obj
+COMPILER INVOKED BY: E:\KEIL_C51\C51\BIN\C51.EXE App\catch\catch.c BROWSE INCDIR(.\App\catch;.\App;.\Public;.\User;.\App
+                    -\show;.\App\change;.\App\sound;.\App\wifi) DEBUG OBJECTEXTEND PRINT(.\Obj\catch.lst) OBJECT(.\Obj\catch.obj)
+
+line level    source
+
+   1          #include "catch.h"
+   2          
+   3          int catch_temp_value;
+   4          //u8 temp_buf[6];
+   5          
+   6          void mycatch(u8 *temp_buf, int* old){
+   7   1      //      ds18b20_init();
+   8   1              catch_temp_value = ds18b20_read_temperture() * 10;//保留温度值小数后一位
+   9   1              *old = catch_temp_value;
+  10   1              if (catch_temp_value < 0)//负温度
+  11   1              {
+  12   2                      catch_temp_value = -catch_temp_value;
+  13   2                      temp_buf[0] = '-';//显示负号    
+  14   2              }
+  15   1              else
+  16   1                      temp_buf[0] = ' ';//不显示
+  17   1              temp_buf[1] = catch_temp_value / 1000 + '0';//百位
+  18   1              temp_buf[2] = catch_temp_value % 1000 / 100 + '0';//十位
+  19   1              temp_buf[3] = catch_temp_value % 1000 % 100 / 10 + '0';//个位
+  20   1              temp_buf[4] = '.';
+  21   1              temp_buf[5] = catch_temp_value % 1000 % 100 % 10 + '0';//小数点后一位
+  22   1              temp_buf[6] = '\0';
+  23   1              return ;
+  24   1      //      return temp_buf;
+  25   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    266    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

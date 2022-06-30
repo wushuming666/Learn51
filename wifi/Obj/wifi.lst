@@ -1,0 +1,114 @@
+C51 COMPILER V9.01   WIFI                                                                  06/30/2022 14:42:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE WIFI
+OBJECT MODULE PLACED IN .\Obj\wifi.obj
+COMPILER INVOKED BY: E:\KEIL_C51\C51\BIN\C51.EXE App\wifi\wifi.c BROWSE INCDIR(.\App\catch;.\App;.\Public;.\User;.\App\s
+                    -how;.\App\change;.\App\sound;.\App\wifi) DEBUG OBJECTEXTEND PRINT(.\Obj\wifi.lst) OBJECT(.\Obj\wifi.obj)
+
+line level    source
+
+   1          #include "wifi.h"
+   2          #include "ds18b20.h"
+   3          #include "uart.h"
+   4          #include "smg.h"
+*** WARNING C318 IN LINE 4 OF App\wifi\wifi.c: can't open file 'smg.h'
+   5          #include "change.h"
+   6          
+   7          //定义LED1管脚                                                                                                   
+   8          sbit LED1=P2^0;
+   9          
+  10          //ESP8266 WIFI发送AT指令
+  11          //pbuf：AT指令，字符串格式，如："AT"
+  12          void ESP8266_SendCmd(u8 *pbuf)
+  13          {
+  14   1              while(*pbuf!='\0') //遇到空格跳出循环   
+  15   1              {
+  16   2                      UART_SendData(*pbuf);
+  17   2                      delay_10us(5);
+  18   2                      pbuf++; 
+  19   2              }
+  20   1              delay_10us(5);
+  21   1              UART_SendData('\r');//回车
+  22   1              delay_10us(5);
+  23   1              UART_SendData('\n');//换行
+  24   1              delay_ms(10);
+  25   1      }
+  26          
+  27          //ESP8266 WIFI发送数据到APP
+  28          //pbuf：数据
+  29          void ESP8266_SendData(u8 *pbuf)
+  30          {
+  31   1              ESP8266_SendCmd("AT+CIPSEND=0,7");
+  32   1              while(*pbuf!='\0') //遇到空格跳出循环   
+  33   1              {
+  34   2                      UART_SendData(*pbuf);
+  35   2                      delay_10us(5);
+  36   2                      pbuf++; 
+  37   2              }
+  38   1              UART_SendData('\n');//换行      
+  39   1      //      delay_ms(10);
+  40   1      }
+  41          
+  42          //ESP8266-WIFI模块工作模式初始化
+  43          void ESP8266_ModeInit(void)
+  44          {
+  45   1              ESP8266_SendCmd("AT+CWMODE=2");//设置路由器模式 1 staTIon模式 2 AP点 路由器模式 3 station+AP混合模式
+  46   1              ESP8266_SendCmd("AT+CWSAP=\"ESP8266\",\"123456\",11,0"); //设置WIFI热点名及密码
+  47   1              ESP8266_SendCmd("AT+CIPAP=\"192.168.4.1\"");
+  48   1      //      ESP8266_SendCmd("AT+RST");//重新启动wifi模块
+  49   1      //      delay_ms(2000);
+  50   1              ESP8266_SendCmd("AT+CIPMUX=1"); //开启多连接模式，允许多个各客户端接入
+  51   1              ESP8266_SendCmd("AT+CIPSERVER=1,8080"); //启动TCP/IP 端口为8080 实现基于网络控制        
+  52   1      } 
+  53          
+C51 COMPILER V9.01   WIFI                                                                  06/30/2022 14:42:52 PAGE 2   
+
+  54          //WIFI控制初始化
+  55          void wifi_control_init(void)
+  56          {
+  57   1              UART_Init();
+  58   1              ds18b20_init();//初始化DS18B20
+  59   1              ESP8266_ModeInit();
+  60   1              ES=1;//允许串口中断
+  61   1      }
+  62          
+  63          //WIFI控制
+  64          void wifi_control(void)
+  65          {
+  66   1              static u16 i=0, j;
+  67   1              u8 temp_buf[5];
+  68   1              int temp_value;
+  69   1              u8 wifi_send_buf[7];
+  70   1      #if 1
+  71   1              {
+  72   2                      i++;            
+  73   2                      if(i%200==0)//间隔一段时间将读取的温度发送到APP
+  74   2                      {
+  75   3                              ESP8266_SendData("yes\0");//通过串口发送温度数据到APP
+  76   3                      }                       
+  77   2              }       
+  78   1      #endif
+  79   1      }
+*** WARNING C280 IN LINE 66 OF APP\WIFI\WIFI.C: 'j': unreferenced local variable
+*** WARNING C280 IN LINE 67 OF APP\WIFI\WIFI.C: 'temp_buf': unreferenced local variable
+*** WARNING C280 IN LINE 68 OF APP\WIFI\WIFI.C: 'temp_value': unreferenced local variable
+*** WARNING C280 IN LINE 69 OF APP\WIFI\WIFI.C: 'wifi_send_buf': unreferenced local variable
+  80          
+  81          
+  82          
+  83          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    216    ----
+   CONSTANT SIZE    =    120    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4      20
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  5 WARNING(S),  0 ERROR(S)

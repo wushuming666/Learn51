@@ -1,0 +1,11 @@
+".\Obj\ds18b20.obj",
+".\Obj\lcd1602.obj",
+".\Obj\sound.obj",
+".\Obj\change.obj",
+".\Obj\catch.obj",
+".\Obj\wifi.obj",
+".\Obj\main.obj",
+".\Obj\public.obj",
+".\Obj\uart.obj" 
+TO ".\Obj\template" 
+PRINT(".\Obj\template.m51") RAMSIZE(256) 

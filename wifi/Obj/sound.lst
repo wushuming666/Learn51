@@ -1,0 +1,53 @@
+C51 COMPILER V9.01   SOUND                                                                 06/30/2022 14:42:52 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE SOUND
+OBJECT MODULE PLACED IN .\Obj\sound.obj
+COMPILER INVOKED BY: E:\KEIL_C51\C51\BIN\C51.EXE App\sound\sound.c BROWSE INCDIR(.\App\catch;.\App;.\Public;.\User;.\App
+                    -\show;.\App\change;.\App\sound;.\App\wifi) DEBUG OBJECTEXTEND PRINT(.\Obj\sound.lst) OBJECT(.\Obj\sound.obj)
+
+line level    source
+
+   1          /**************************************************************************************
+   2          深圳市普中科技有限公司（PRECHIN 普中）
+   3          技术支持：www.prechin.net
+   4          
+   5          实验名称：蜂鸣器实验
+   6          接线说明：      
+   7          实验现象：下载程序后蜂鸣器发出声音，一段时间后关闭
+   8          注意事项：                                                                                                                                                                
+   9          ***************************************************************************************/
+  10          #include "sound.h"
+  11          
+  12          
+  13          sbit BEEP=P2^5; //将P2.5管脚定义为BEEP
+  14          
+  15          void sound(u8 i)
+  16          {       
+  17   1              while (i--)//循环2000次
+  18   1              {
+  19   2                      BEEP = !BEEP;//产生一定频率的脉冲信号
+  20   2                      delay_10us(100);
+  21   2              }
+  22   1              i = 0;//清零
+  23   1              BEEP = 0;//关闭蜂鸣器           
+  24   1      }
+  25          
+  26          void check(int now_val, float maxn){
+  27   1              if (now_val > maxn * 10) sound(1000);
+  28   1              return ;        
+  29   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     93    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
